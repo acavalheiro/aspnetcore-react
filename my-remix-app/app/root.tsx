@@ -18,7 +18,7 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: appStylesHref },
 ];
 
-import { getAllSettings, SettingsRecord } from './api/dataSettings'
+import { getAllSettings } from './api/dataSettings'
 
 export async function clientLoader({
   request,
@@ -29,7 +29,7 @@ export async function clientLoader({
 }
 
 export default function App() {
-  const settings = useLoaderData();
+  const settings = useLoaderData<typeof clientLoader>();
 
   return (
     <html lang="en">
@@ -60,8 +60,8 @@ export default function App() {
           <nav>
             <ul>
               {settings.map((setting) => (
-                <li >
-                  <Link to={`/settings/${setting.id}`}>{setting.guid}</Link>
+                <li key={setting.id} >
+                  <Link to={`/settings/${setting.guid}`}>{setting.guid}</Link>
                 </li>
               ))}
             </ul>

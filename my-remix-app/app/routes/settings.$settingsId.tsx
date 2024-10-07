@@ -1,29 +1,53 @@
-import { json } from "@remix-run/node"; // or cloudflare/deno
 import { useLoaderData } from "@remix-run/react";
 import type { ClientLoaderFunctionArgs } from "@remix-run/react";
+import { Form } from "@remix-run/react";
+import invariant from "tiny-invariant";
 
-// export async function loader() {
-//     const res = await fetch("https://api.github.com/gists");
-//     return json(await res.json());
-//   }
+import { getSettings } from '../api/dataSettings'
 
 
-export async function clientLoader({
-  request,
-}: ClientLoaderFunctionArgs) {
-  const data = await fetch("https://localhost:7092/api/Settings/Data");// (2)
-  return await data.json();
-}
-  
+export const clientLoader = async ({
+  params,
+}: ClientLoaderFunctionArgs) => {
+  invariant(params.settingsId, "Missing contactId param");
+  const setting = await getSettings(params.settingsId);
+  if (!setting) {
+    throw new Response("Not Found", { status: 404 });
+  }
+  return setting;
+};
+
+
   export default function Settings() {
-    const gists = useLoaderData<typeof clientLoader>();
+    const setting = useLoaderData<typeof clientLoader>();
     return (
-      <ul>
-        {gists.map((gist) => (
-          <li key={gist.id}>
-            <a href={gist.guid}>{gist.id}</a>
-          </li>
-        ))}
-      </ul>
+      <Form key={setting.id} id="setting-form" method="post">
+        <p>
+          <span>Id</span>
+          <input
+            aria-label="First name"
+            defaultValue={setting.id}
+            name="first"
+            placeholder="First"
+            type="text"
+          />
+          
+        </p>
+        <label>
+          <span>Guid</span>
+          <input
+            defaultValue={setting.guid}
+            name="twitter"
+            placeholder="@jack"
+            type="text"
+          />
+        </label>
+        
+        <p>
+          <button type="submit">Save</button>
+          <button type="button">Cancel</button>
+        </p>
+      </Form>
     );
   }
+  
